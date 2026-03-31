@@ -232,7 +232,15 @@
       });
       markStepDone(step1El);
       markStepActive(step2El);
-      setStatus(uploadStatus, "Parsed " + state.existingSchedule.length + " existing records.", "success");
+      var uploadWarnings = Array.isArray(response.warnings) ? response.warnings : [];
+      if (uploadWarnings.length > 0) {
+        setStatus(uploadStatus, "File parsed with warnings — see below.", "error");
+        renderValidation([], uploadWarnings, false);
+      } else {
+        setStatus(uploadStatus, "Parsed " + state.existingSchedule.length + " existing records.", "success");
+        renderValidation([], [], true);
+      }
+      await loadAuditHistory();
       await loadAuditHistory();
       setTimeout(function () {
         sectionData.scrollIntoView({ behavior: "smooth", block: "start" });

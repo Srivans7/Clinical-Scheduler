@@ -169,6 +169,14 @@ def upload_file():
             "preferred_checkin": serial_to_iso(new_study.preferred_checkin_serial),
         }
 
+    upload_warnings = []
+    if not clinics_data:
+        upload_warnings.append("Sheet 'Clinics' not found or empty — no clinic data loaded.")
+    if not existing_data:
+        upload_warnings.append("Sheet 'Existing Sch' not found or empty — no existing schedule loaded.")
+    if not new_study_data:
+        upload_warnings.append("Sheet 'New Study' not found or incomplete (Protocol / Check-in missing) — please fill in the study fields below manually.")
+
     audit = register_upload(
         original_filename=file.filename,
         stored_filename=filename,
@@ -184,6 +192,7 @@ def upload_file():
         "existing_schedule": existing_data,
         "new_study": new_study_data,
         "audit": audit,
+        "warnings": upload_warnings,
     })
 
 
