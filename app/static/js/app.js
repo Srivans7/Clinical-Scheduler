@@ -27,6 +27,9 @@
   var finalSummary = document.getElementById("final-summary");
   var auditSummary = document.getElementById("audit-summary");
   var auditHistory = document.getElementById("audit-history");
+  var topToast = document.getElementById("top-toast");
+  var serverBootId = document.body ? (document.body.getAttribute("data-server-boot-id") || "") : "";
+  var toastTimer = null;
   var checkinAvailabilityEl = null;
 
   var nsFields = {
@@ -85,7 +88,7 @@
     bindDropzone();
     bindForm();
     bindActions();
-    if (isReloadNavigation()) {
+    if (isReloadNavigation() || isServerSessionStale()) {
       clearPersistedState();
       resetPreviewState();
     } else if (!restorePersistedState()) {
@@ -541,6 +544,7 @@
       setStepProgressFromState();
       persistState();
       renderValidation([], ["Stored successfully. Screen reset for next run with the same uploaded file."], false);
+      showTopToast("Stored successfully.", "success", 2600);
       await loadAuditHistory();
     } catch (error) {
       if (error.data && Array.isArray(error.data.errors)) {
@@ -1056,6 +1060,7 @@
   function persistState() {
     try {
       var payload = {
+        serverBootId: serverBootId,
         uploadedFilename: state.uploadedFilename,
         originalStudy: state.originalStudy,
         audit: state.audit,
@@ -1079,6 +1084,25 @@
       window.sessionStorage.removeItem(STORAGE_KEY);
     } catch (_err) {
       // Ignore storage errors.
+    }
+  }
+
+  function isServerSessionStale() {
+    try {
+      var raw = window.sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return false;
+      }
+      var saved = JSON.parse(raw);
+      if (!saved || typeof saved !== "object") {
+        return true;
+      }
+      if (!saved.serverBootId || !serverBootId) {
+        return false;
+      }
+      return saved.serverBootId !== serverBootId;
+    } catch (_err) {
+      return true;
     }
   }
 
@@ -1108,6 +1132,10 @@
 
       var saved = JSON.parse(raw);
       if (!saved || typeof saved !== "object") {
+        return false;
+      }
+      if (saved.serverBootId && serverBootId && saved.serverBootId !== serverBootId) {
+        clearPersistedState();
         return false;
       }
 
@@ -1198,6 +1226,23 @@
   function setStatus(element, message, type) {
     element.textContent = message;
     element.className = 'inline-status' + (type ? ' ' + type : '');
+  }
+
+  function showTopToast(message, type, durationMs) {
+    if (!topToast) {
+      return;
+    }
+    if (toastTimer) {
+      window.clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    topToast.textContent = message;
+    topToast.className = "top-toast " + (type || "success");
+    topToast.classList.remove("hidden");
+    toastTimer = window.setTimeout(function () {
+      topToast.classList.add("hidden");
+      toastTimer = null;
+    }, durationMs || 2500);
   }
 
   function fetchJson(url, options) {

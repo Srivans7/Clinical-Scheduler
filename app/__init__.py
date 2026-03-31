@@ -2,6 +2,7 @@
 Flask application entry point for the Clinical Trial Scheduler.
 """
 import os
+import uuid
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 
@@ -18,6 +19,7 @@ from app.models import serial_to_iso, iso_to_serial, NewStudyInput
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", "uploads")
 ALLOWED_EXTENSIONS = {"xlsx"}
+SERVER_BOOT_ID = uuid.uuid4().hex[:12]
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -94,7 +96,7 @@ def _build_results_summary(results: list[dict]) -> dict:
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", server_boot_id=SERVER_BOOT_ID)
 
 
 @app.route("/history")
@@ -109,7 +111,7 @@ def utilization_page():
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "ok"}), 200
+    return jsonify({"status": "ok", "boot_id": SERVER_BOOT_ID}), 200
 
 
 @app.errorhandler(413)

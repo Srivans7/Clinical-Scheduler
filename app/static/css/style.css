@@ -1140,6 +1140,33 @@ main {
 }
 .fade-up { animation: fadeUp .3s ease forwards; }
 
+/* ── Top toast ── */
+.top-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  max-width: min(92vw, 560px);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.top-toast.success {
+  background: #ecfdf3;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.top-toast.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
 /* ── Hidden ── */
 .hidden { display: none !important; }
 
