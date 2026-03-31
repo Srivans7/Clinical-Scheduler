@@ -531,12 +531,16 @@
       state.previewResults = response.results || state.previewResults;
       state.previewSummary = response.summary || state.previewSummary;
       state.previewDirty = false;
-      persistState();
-
-      renderResults(state.previewResults);
+      state.originalStudy = cloneValue(validation.currentStudy);
+      resetPreviewState();
+      sectionResults.classList.add("hidden");
+      renderResults([]);
       renderFinalSummary();
       renderAuditSummary();
       renderPreviewState();
+      setStepProgressFromState();
+      persistState();
+      renderValidation([], ["Stored successfully. Screen reset for next run with the same uploaded file."], false);
       await loadAuditHistory();
     } catch (error) {
       if (error.data && Array.isArray(error.data.errors)) {
