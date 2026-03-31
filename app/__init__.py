@@ -10,6 +10,7 @@ from app.audit_store import (
     get_recent_transactions,
     get_transaction_details,
     delete_transaction,
+    delete_all_transactions,
     register_schedule_run,
     register_upload,
 )
@@ -296,6 +297,12 @@ def audit_log():
     query = str(request.args.get("q", "")).strip()
     status = str(request.args.get("status", "")).strip()
     return jsonify({"items": get_recent_transactions(limit=limit, query=query, status=status)})
+
+
+@app.route("/api/audit-log", methods=["DELETE"])
+def audit_log_delete_all():
+    deleted = delete_all_transactions()
+    return jsonify(deleted)
 
 
 @app.route("/api/audit-log/<transaction_id>", methods=["GET"])

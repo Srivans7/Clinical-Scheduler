@@ -6,9 +6,12 @@
   var searchInput = document.getElementById("history-search");
   var statusSelect = document.getElementById("history-status");
   var refreshButton = document.getElementById("history-refresh");
+  var deleteAllButton = document.getElementById("history-delete-all");
   var historyCount = document.getElementById("history-count");
   var historyStats = document.getElementById("history-stats");
   var historyList = document.getElementById("history-list");
+  var topToast = document.getElementById("top-toast");
+  var toastTimer = null;
 
   initialize();
 
@@ -16,6 +19,9 @@
     searchInput.addEventListener("input", debounce(loadHistory, 220));
     statusSelect.addEventListener("change", loadHistory);
     refreshButton.addEventListener("click", loadHistory);
+    if (deleteAllButton) {
+      deleteAllButton.addEventListener("click", deleteAllTransactions);
+    }
     historyList.addEventListener("click", onHistoryListClick);
     loadHistory();
   }
@@ -44,6 +50,7 @@
       await fetchJson("/api/audit-log/" + encodeURIComponent(transactionId), {
         method: "DELETE"
       });
+      showTopToast("Deleted " + transactionId + " successfully.", "success");
       await loadHistory();
     } catch (error) {
       window.alert(error.message || "Failed to delete transaction.");
@@ -63,6 +70,7 @@
       });
       var response = await fetchJson("/api/audit-log?" + query.toString());
       var items = response.items || [];
+      updateDeleteAllButton(items.length);
       renderStats(items);
       historyCount.textContent = items.length + (items.length === 1 ? " record" : " records");
       await renderHistory(items);
@@ -70,9 +78,41 @@
       historyList.innerHTML = '<div class="empty-state">' + escapeHtml(error.message || "Failed to load history.") + '</div>';
       historyStats.innerHTML = '';
       historyCount.textContent = '0 records';
+      updateDeleteAllButton(0);
     } finally {
       refreshButton.disabled = false;
       refreshButton.textContent = "Refresh";
+    }
+  }
+
+  async function deleteAllTransactions() {
+    if (!deleteAllButton || deleteAllButton.disabled) {
+      return;
+    }
+    var totalRecords = parseInt(historyCount.textContent, 10) || 0;
+    if (totalRecords <= 0) {
+      return;
+    }
+
+    var confirmed = window.confirm("Delete ALL transactions and linked records? This cannot be undone.");
+    if (!confirmed) {
+      return;
+    }
+
+    deleteAllButton.disabled = true;
+    var previousLabel = deleteAllButton.textContent;
+    deleteAllButton.textContent = "Deleting all...";
+
+    try {
+      var response = await fetchJson("/api/audit-log", { method: "DELETE" });
+      showTopToast("Deleted " + String(response.transactions_deleted || 0) + " transactions successfully.", "success");
+      await loadHistory();
+    } catch (error) {
+      window.alert(error.message || "Failed to delete all transactions.");
+    } finally {
+      deleteAllButton.disabled = false;
+      deleteAllButton.textContent = previousLabel;
+      updateDeleteAllButton(parseInt(historyCount.textContent, 10) || 0);
     }
   }
 
@@ -106,19 +146,22 @@
     historyList.innerHTML = details.map(function (detail, index) {
       var item = items[index];
       if (!detail) {
-        return fallbackCard(item);
+        return fallbackCard(item, index + 1);
       }
-      return detailCard(detail);
+      return detailCard(detail, index + 1);
     }).join("");
   }
 
-  function detailCard(detail) {
+  function detailCard(detail, rowNumber) {
     var latestOutput = detail.outputs.length ? detail.outputs[detail.outputs.length - 1] : null;
     var latestInput = detail.inputs.length ? detail.inputs[detail.inputs.length - 1] : null;
 
     return '<article class="history-card">' +
       '<div class="history-card-head">' +
-        '<div class="history-card-title">' + escapeHtml(detail.transaction_id) + ' / ' + escapeHtml(detail.file_id) + '</div>' +
+        '<div class="history-title-wrap">' +
+          '<span class="history-row-badge">Row ' + escapeHtml(rowNumber) + '</span>' +
+          '<div class="history-card-title">' + escapeHtml(detail.transaction_id) + ' / ' + escapeHtml(detail.file_id) + '</div>' +
+        '</div>' +
         '<div class="history-card-actions">' +
           '<div class="history-status ' + escapeHtml(detail.status) + '">' + escapeHtml(detail.status) + '</div>' +
           '<button type="button" class="btn btn-ghost btn-danger" data-action="delete-transaction" data-transaction-id="' + escapeHtml(detail.transaction_id) + '">Delete</button>' +
@@ -150,10 +193,13 @@
     '</article>';
   }
 
-  function fallbackCard(item) {
+  function fallbackCard(item, rowNumber) {
     return '<article class="history-card">' +
       '<div class="history-card-head">' +
-        '<div class="history-card-title">' + escapeHtml(item.transaction_id) + ' / ' + escapeHtml(item.file_id) + '</div>' +
+        '<div class="history-title-wrap">' +
+          '<span class="history-row-badge">Row ' + escapeHtml(rowNumber) + '</span>' +
+          '<div class="history-card-title">' + escapeHtml(item.transaction_id) + ' / ' + escapeHtml(item.file_id) + '</div>' +
+        '</div>' +
         '<div class="history-card-actions">' +
           '<div class="history-status ' + escapeHtml(item.status || '') + '">' + escapeHtml(item.status || 'unknown') + '</div>' +
           '<button type="button" class="btn btn-ghost btn-danger" data-action="delete-transaction" data-transaction-id="' + escapeHtml(item.transaction_id) + '">Delete</button>' +
@@ -230,6 +276,30 @@
         return data;
       });
     });
+  }
+
+  function updateDeleteAllButton(recordCount) {
+    if (!deleteAllButton) {
+      return;
+    }
+    deleteAllButton.disabled = !recordCount;
+  }
+
+  function showTopToast(message, type) {
+    if (!topToast) {
+      return;
+    }
+    if (toastTimer) {
+      window.clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    topToast.textContent = message;
+    topToast.className = "top-toast " + (type || "success");
+    topToast.classList.remove("hidden");
+    toastTimer = window.setTimeout(function () {
+      topToast.classList.add("hidden");
+      toastTimer = null;
+    }, 2500);
   }
 
   function escapeHtml(value) {

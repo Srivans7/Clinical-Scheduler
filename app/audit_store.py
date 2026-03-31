@@ -670,4 +670,40 @@ def delete_transaction(transaction_id: str) -> Dict[str, Any]:
     }
 
 
+def delete_all_transactions() -> Dict[str, Any]:
+    _initialize()
+    with _LOCK:
+        conn = _connect()
+        try:
+            tx_count_row = conn.execute("SELECT COUNT(*) AS cnt FROM transactions").fetchone()
+            tx_count = int(tx_count_row["cnt"]) if tx_count_row else 0
+
+            file_rows = conn.execute("SELECT file_path FROM files").fetchall()
+            file_paths = [row["file_path"] for row in file_rows if row and row["file_path"]]
+
+            conn.execute("DELETE FROM operations")
+            conn.execute("DELETE FROM outputs")
+            conn.execute("DELETE FROM inputs")
+            conn.execute("DELETE FROM transactions")
+            conn.execute("DELETE FROM files")
+            conn.commit()
+        finally:
+            conn.close()
+
+    deleted_files = 0
+    for path in set(file_paths):
+        try:
+            if os.path.isfile(path):
+                os.remove(path)
+                deleted_files += 1
+        except OSError:
+            continue
+
+    return {
+        "deleted": True,
+        "transactions_deleted": tx_count,
+        "files_deleted": deleted_files,
+    }
+
+
 _initialize()

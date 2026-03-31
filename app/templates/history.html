@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
 </head>
 <body>
+<div id="top-toast" class="top-toast hidden" role="status" aria-live="polite"></div>
 <nav class="navbar">
   <div class="nav-inner">
     <div class="nav-brand">
@@ -62,6 +63,9 @@
       <div>
         <h2 class="panel-title">Transactions</h2>
         <p class="panel-sub">Each card shows the linked records generated from upload through confirm</p>
+      </div>
+      <div class="history-head-actions">
+        <button id="history-delete-all" class="btn btn-ghost btn-danger" type="button">Delete All</button>
       </div>
     </div>
     <div id="history-list" class="history-list"></div>
