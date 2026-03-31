@@ -110,7 +110,7 @@
   // ── load recent transactions into the dropdown ──────────────────────────
   async function loadTransactions() {
     try {
-      const res  = await fetch("/api/audit-log?limit=20");
+      const res  = await fetch("/api/audit-log?limit=50&status=scheduled");
       const data = await res.json();
       const items = data.items || [];
 

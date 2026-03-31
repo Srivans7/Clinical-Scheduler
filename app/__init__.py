@@ -320,7 +320,14 @@ def utilization_api():
 
     filepath = file_row.get("file_path", "")
     if not os.path.isfile(filepath):
-        return jsonify({"error": "Uploaded file is no longer available on disk."}), 404
+        # Fallback for migrated/legacy records whose original absolute file paths
+        # no longer exist on the current host (e.g., local Windows path on server).
+        stored_filename = secure_filename(file_row.get("stored_filename", ""))
+        candidate = os.path.join(app.config["UPLOAD_FOLDER"], stored_filename) if stored_filename else ""
+        if candidate and os.path.isfile(candidate):
+            filepath = candidate
+        else:
+            return jsonify({"error": "Uploaded file is no longer available on disk."}), 404
 
     try:
         clinics, existing_periods, _ = parse_excel(filepath)
