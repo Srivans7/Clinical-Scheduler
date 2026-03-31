@@ -6,6 +6,7 @@
   var dropZone = document.getElementById("drop-zone");
   var fileInput = document.getElementById("file-input");
   var btnUpload = document.getElementById("btn-upload");
+  var btnResetUpload = document.getElementById("btn-reset-upload");
   var uploadStatus = document.getElementById("upload-status");
   var btnPreview = document.getElementById("btn-schedule");
   var btnConfirm = document.getElementById("btn-confirm");
@@ -84,9 +85,8 @@
     bindDropzone();
     bindForm();
     bindActions();
-    if (!restorePersistedState()) {
-      resetPreviewState();
-    }
+    clearPersistedState();
+    resetPreviewState();
     restorePlannerFromState();
     renderValidation([], [], true);
     renderReviewMeta();
@@ -160,6 +160,7 @@
 
   function bindActions() {
     btnUpload.addEventListener("click", uploadFile);
+    btnResetUpload.addEventListener("click", resetUploadContext);
     btnPreview.addEventListener("click", previewSchedule);
     btnConfirm.addEventListener("click", confirmSchedule);
     btnRerun.addEventListener("click", function () {
@@ -457,6 +458,7 @@
       state.confirmedAudit = null;
       state.confirmedSummary = null;
       persistState();
+      btnResetUpload.classList.remove("hidden");
 
       renderResults(state.previewResults);
       renderFinalSummary();
@@ -917,6 +919,40 @@
     state.confirmedSummary = null;
   }
 
+  function resetUploadContext() {
+    state.pendingFile = null;
+    state.uploadedFilename = null;
+    state.originalStudy = null;
+    state.audit = null;
+    state.clinics = [];
+    state.existingSchedule = [];
+    resetPreviewState();
+
+    clearPersistedState();
+    fileInput.value = "";
+    dropZone.classList.remove("has-file");
+    dropZone.querySelector(".dropzone-main").textContent = "Drop your Excel file here";
+    dropZone.querySelector(".dropzone-hint").innerHTML = 'or <span class="link-text">click to browse files</span>';
+
+    sectionData.classList.add("hidden");
+    sectionResults.classList.add("hidden");
+    summaryStrip.innerHTML = "";
+    clinicGrid.innerHTML = "";
+    existingTbody.innerHTML = "";
+    existingCount.textContent = "";
+    btnUpload.disabled = true;
+    btnResetUpload.classList.add("hidden");
+    setStatus(uploadStatus, "", "");
+    renderValidation([], [], true);
+    renderReviewMeta();
+    renderChangePreview();
+    renderResults([]);
+    renderFinalSummary();
+    renderAuditSummary();
+    setStepProgressFromState();
+    refreshReviewState();
+  }
+
   function restorePlannerFromState() {
     setStepProgressFromState();
 
@@ -1006,6 +1042,14 @@
       window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch (_err) {
       // Ignore storage errors (private mode, quota, disabled storage).
+    }
+  }
+
+  function clearPersistedState() {
+    try {
+      window.sessionStorage.removeItem(STORAGE_KEY);
+    } catch (_err) {
+      // Ignore storage errors.
     }
   }
 
