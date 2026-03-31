@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinical Trial Scheduler - History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span class="nav-title">TrialScheduler</span>
+      <span class="nav-version">v1.0</span>
+    </div>
+    <div class="nav-meta">
+      <a href="{{ url_for('index') }}" class="nav-link">Planner</a>
+      <a href="{{ url_for('history_page') }}" class="nav-link active">History</a>
+      <a href="{{ url_for('utilization_page') }}" class="nav-link">Utilization</a>
+      <span class="nav-tag">Clinical Operations</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero-bar">
+  <div class="hero-inner">
+    <h1 class="hero-title">Stored Scheduling History</h1>
+    <p class="hero-sub">Search transactions, inspect linked file-input-output records, and review what was confirmed into SQLite.</p>
+  </div>
+</div>
+
+<main class="page-shell">
+  <section class="panel">
+    <div class="panel-header between">
+      <div>
+        <h2 class="panel-title">Audit Explorer</h2>
+        <p class="panel-sub">Filter by filename, transaction id, file id, or status</p>
+      </div>
+      <span class="count-badge" id="history-count">0 records</span>
+    </div>
+    <div class="history-toolbar">
+      <input id="history-search" class="toolbar-input" type="text" placeholder="Search transaction, file, output, or filename" />
+      <select id="history-status" class="toolbar-select">
+        <option value="">All statuses</option>
+        <option value="uploaded">Uploaded only</option>
+        <option value="scheduled">Scheduled</option>
+      </select>
+      <button id="history-refresh" class="btn btn-primary">Refresh</button>
+    </div>
+  </section>
+
+  <section class="history-stats" id="history-stats"></section>
+
+  <section class="panel">
+    <div class="panel-header between">
+      <div>
+        <h2 class="panel-title">Transactions</h2>
+        <p class="panel-sub">Each card shows the linked records generated from upload through confirm</p>
+      </div>
+    </div>
+    <div id="history-list" class="history-list"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span>Clinical Trial Scheduler &nbsp;·&nbsp; SQLite Audit History</span>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</body>
+</html>

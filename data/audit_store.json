@@ -1,0 +1,530 @@
+{
+  "version": 1,
+  "counters": {
+    "transaction": 3,
+    "operation": 6,
+    "file": 3,
+    "input": 6,
+    "output": 3
+  },
+  "transactions": [
+    {
+      "transaction_id": "TRN-000001",
+      "file_id": "FIL-000001",
+      "upload_operation_id": "OP-000001",
+      "source_input_record_id": "INP-000001",
+      "latest_request_input_id": "INP-000002",
+      "latest_output_record_id": "OUT-000001",
+      "schedule_operation_ids": [
+        "OP-000002"
+      ],
+      "status": "scheduled",
+      "created_at": "2026-03-25T19:06:27Z",
+      "updated_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "transaction_id": "TRN-000002",
+      "file_id": "FIL-000002",
+      "upload_operation_id": "OP-000003",
+      "source_input_record_id": "INP-000003",
+      "latest_request_input_id": "INP-000004",
+      "latest_output_record_id": "OUT-000002",
+      "schedule_operation_ids": [
+        "OP-000004"
+      ],
+      "status": "scheduled",
+      "created_at": "2026-03-25T19:12:18Z",
+      "updated_at": "2026-03-25T19:13:11Z"
+    },
+    {
+      "transaction_id": "TRN-000003",
+      "file_id": "FIL-000003",
+      "upload_operation_id": "OP-000005",
+      "source_input_record_id": "INP-000005",
+      "latest_request_input_id": "INP-000006",
+      "latest_output_record_id": "OUT-000003",
+      "schedule_operation_ids": [
+        "OP-000006"
+      ],
+      "status": "scheduled",
+      "created_at": "2026-03-25T19:14:40Z",
+      "updated_at": "2026-03-25T19:14:46Z"
+    }
+  ],
+  "files": [
+    {
+      "file_id": "FIL-000001",
+      "transaction_id": "TRN-000001",
+      "original_filename": "Case Study.xlsx",
+      "stored_filename": "Case_Study.xlsx",
+      "file_path": "C:\\Users\\Lenovo\\Downloads\\clinical-scheduler\\uploads\\Case_Study.xlsx",
+      "size_bytes": 18584,
+      "sha256": "5e9d0d78372a545cac08aaf19d04872ab09c41e4de20a1184102f838891ca326",
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "file_id": "FIL-000002",
+      "transaction_id": "TRN-000002",
+      "original_filename": "Case Study.xlsx",
+      "stored_filename": "Case_Study.xlsx",
+      "file_path": "C:\\Users\\Lenovo\\Downloads\\clinical-scheduler\\uploads\\Case_Study.xlsx",
+      "size_bytes": 18584,
+      "sha256": "5e9d0d78372a545cac08aaf19d04872ab09c41e4de20a1184102f838891ca326",
+      "created_at": "2026-03-25T19:12:18Z"
+    },
+    {
+      "file_id": "FIL-000003",
+      "transaction_id": "TRN-000003",
+      "original_filename": "Case Study.xlsx",
+      "stored_filename": "Case_Study.xlsx",
+      "file_path": "C:\\Users\\Lenovo\\Downloads\\clinical-scheduler\\uploads\\Case_Study.xlsx",
+      "size_bytes": 18584,
+      "sha256": "5e9d0d78372a545cac08aaf19d04872ab09c41e4de20a1184102f838891ca326",
+      "created_at": "2026-03-25T19:14:40Z"
+    }
+  ],
+  "inputs": [
+    {
+      "input_record_id": "INP-000001",
+      "transaction_id": "TRN-000001",
+      "file_id": "FIL-000001",
+      "source": "upload_parse",
+      "payload": {
+        "protocol": "B",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3,
+        "preferred_checkin": "2026-04-02"
+      },
+      "counts": {
+        "clinics": 8,
+        "existing_periods": 77
+      },
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "input_record_id": "INP-000002",
+      "transaction_id": "TRN-000001",
+      "file_id": "FIL-000001",
+      "source": "schedule_request",
+      "payload": {
+        "protocol": "B",
+        "preferred_checkin": "2026-04-02",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3
+      },
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "input_record_id": "INP-000003",
+      "transaction_id": "TRN-000002",
+      "file_id": "FIL-000002",
+      "source": "upload_parse",
+      "payload": {
+        "protocol": "B",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3,
+        "preferred_checkin": "2026-04-02"
+      },
+      "counts": {
+        "clinics": 8,
+        "existing_periods": 77
+      },
+      "created_at": "2026-03-25T19:12:18Z"
+    },
+    {
+      "input_record_id": "INP-000004",
+      "transaction_id": "TRN-000002",
+      "file_id": "FIL-000002",
+      "source": "schedule_request",
+      "payload": {
+        "protocol": "B",
+        "preferred_checkin": "2026-04-02",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3
+      },
+      "created_at": "2026-03-25T19:13:11Z"
+    },
+    {
+      "input_record_id": "INP-000005",
+      "transaction_id": "TRN-000003",
+      "file_id": "FIL-000003",
+      "source": "upload_parse",
+      "payload": {
+        "protocol": "B",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3,
+        "preferred_checkin": "2026-04-02"
+      },
+      "counts": {
+        "clinics": 8,
+        "existing_periods": 77
+      },
+      "created_at": "2026-03-25T19:14:40Z"
+    },
+    {
+      "input_record_id": "INP-000006",
+      "transaction_id": "TRN-000003",
+      "file_id": "FIL-000003",
+      "source": "schedule_request",
+      "payload": {
+        "protocol": "B",
+        "preferred_checkin": "2026-04-02",
+        "male": 40,
+        "female": 10,
+        "periods": 2,
+        "washout": 7,
+        "los": 3
+      },
+      "created_at": "2026-03-25T19:14:46Z"
+    }
+  ],
+  "outputs": [
+    {
+      "output_record_id": "OUT-000001",
+      "transaction_id": "TRN-000001",
+      "file_id": "FIL-000001",
+      "request_input_record_id": "INP-000002",
+      "results_summary": {
+        "feasible_count": 2,
+        "total_strategies": 3,
+        "recommended_strategy": "Shift",
+        "recommended_note": "Shifted 15 day(s) from preferred check-in.",
+        "recommended_shift_days": 15,
+        "recommended_period_count": 2
+      },
+      "results": [
+        {
+          "strategy": "Shift",
+          "feasible": true,
+          "shift_days": 15,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46139,
+              "checkout_serial": 46141,
+              "checkin_date": "2026-04-27",
+              "checkout_date": "2026-04-29",
+              "male_clinics": {
+                "1": 40
+              },
+              "female_clinics": {
+                "2": 10
+              }
+            }
+          ],
+          "note": "Shifted 15 day(s) from preferred check-in."
+        },
+        {
+          "strategy": "Split",
+          "feasible": false,
+          "note": "Cannot fit participants even with split at preferred dates."
+        },
+        {
+          "strategy": "Shift+Split",
+          "feasible": true,
+          "shift_days": 5,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46119,
+              "checkout_serial": 46121,
+              "checkin_date": "2026-04-07",
+              "checkout_date": "2026-04-09",
+              "male_clinics": {
+                "3B": 20,
+                "5B": 20
+              },
+              "female_clinics": {
+                "4": 4,
+                "5A": 6
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            }
+          ],
+          "note": "Shifted 5 day(s) and split participants across clinics."
+        }
+      ],
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "output_record_id": "OUT-000002",
+      "transaction_id": "TRN-000002",
+      "file_id": "FIL-000002",
+      "request_input_record_id": "INP-000004",
+      "results_summary": {
+        "feasible_count": 2,
+        "total_strategies": 3,
+        "recommended_strategy": "Shift",
+        "recommended_note": "Shifted 15 day(s) from preferred check-in.",
+        "recommended_shift_days": 15,
+        "recommended_period_count": 2
+      },
+      "results": [
+        {
+          "strategy": "Shift",
+          "feasible": true,
+          "shift_days": 15,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46139,
+              "checkout_serial": 46141,
+              "checkin_date": "2026-04-27",
+              "checkout_date": "2026-04-29",
+              "male_clinics": {
+                "1": 40
+              },
+              "female_clinics": {
+                "2": 10
+              }
+            }
+          ],
+          "note": "Shifted 15 day(s) from preferred check-in."
+        },
+        {
+          "strategy": "Split",
+          "feasible": false,
+          "note": "Cannot fit participants even with split at preferred dates."
+        },
+        {
+          "strategy": "Shift+Split",
+          "feasible": true,
+          "shift_days": 5,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46119,
+              "checkout_serial": 46121,
+              "checkin_date": "2026-04-07",
+              "checkout_date": "2026-04-09",
+              "male_clinics": {
+                "3B": 20,
+                "5B": 20
+              },
+              "female_clinics": {
+                "4": 4,
+                "5A": 6
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            }
+          ],
+          "note": "Shifted 5 day(s) and split participants across clinics."
+        }
+      ],
+      "created_at": "2026-03-25T19:13:11Z"
+    },
+    {
+      "output_record_id": "OUT-000003",
+      "transaction_id": "TRN-000003",
+      "file_id": "FIL-000003",
+      "request_input_record_id": "INP-000006",
+      "results_summary": {
+        "feasible_count": 2,
+        "total_strategies": 3,
+        "recommended_strategy": "Shift",
+        "recommended_note": "Shifted 15 day(s) from preferred check-in.",
+        "recommended_shift_days": 15,
+        "recommended_period_count": 2
+      },
+      "results": [
+        {
+          "strategy": "Shift",
+          "feasible": true,
+          "shift_days": 15,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46139,
+              "checkout_serial": 46141,
+              "checkin_date": "2026-04-27",
+              "checkout_date": "2026-04-29",
+              "male_clinics": {
+                "1": 40
+              },
+              "female_clinics": {
+                "2": 10
+              }
+            }
+          ],
+          "note": "Shifted 15 day(s) from preferred check-in."
+        },
+        {
+          "strategy": "Split",
+          "feasible": false,
+          "note": "Cannot fit participants even with split at preferred dates."
+        },
+        {
+          "strategy": "Shift+Split",
+          "feasible": true,
+          "shift_days": 5,
+          "periods": [
+            {
+              "period_num": 1,
+              "checkin_serial": 46119,
+              "checkout_serial": 46121,
+              "checkin_date": "2026-04-07",
+              "checkout_date": "2026-04-09",
+              "male_clinics": {
+                "3B": 20,
+                "5B": 20
+              },
+              "female_clinics": {
+                "4": 4,
+                "5A": 6
+              }
+            },
+            {
+              "period_num": 2,
+              "checkin_serial": 46129,
+              "checkout_serial": 46131,
+              "checkin_date": "2026-04-17",
+              "checkout_date": "2026-04-19",
+              "male_clinics": {
+                "2": 40
+              },
+              "female_clinics": {
+                "1": 10
+              }
+            }
+          ],
+          "note": "Shifted 5 day(s) and split participants across clinics."
+        }
+      ],
+      "created_at": "2026-03-25T19:14:46Z"
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "OP-000001",
+      "transaction_id": "TRN-000001",
+      "type": "upload",
+      "file_id": "FIL-000001",
+      "input_record_id": "INP-000001",
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "operation_id": "OP-000002",
+      "transaction_id": "TRN-000001",
+      "type": "schedule",
+      "file_id": "FIL-000001",
+      "source_input_record_id": "INP-000001",
+      "request_input_record_id": "INP-000002",
+      "output_record_id": "OUT-000001",
+      "created_at": "2026-03-25T19:06:27Z"
+    },
+    {
+      "operation_id": "OP-000003",
+      "transaction_id": "TRN-000002",
+      "type": "upload",
+      "file_id": "FIL-000002",
+      "input_record_id": "INP-000003",
+      "created_at": "2026-03-25T19:12:18Z"
+    },
+    {
+      "operation_id": "OP-000004",
+      "transaction_id": "TRN-000002",
+      "type": "schedule",
+      "file_id": "FIL-000002",
+      "source_input_record_id": "INP-000003",
+      "request_input_record_id": "INP-000004",
+      "output_record_id": "OUT-000002",
+      "created_at": "2026-03-25T19:13:11Z"
+    },
+    {
+      "operation_id": "OP-000005",
+      "transaction_id": "TRN-000003",
+      "type": "upload",
+      "file_id": "FIL-000003",
+      "input_record_id": "INP-000005",
+      "created_at": "2026-03-25T19:14:40Z"
+    },
+    {
+      "operation_id": "OP-000006",
+      "transaction_id": "TRN-000003",
+      "type": "schedule",
+      "file_id": "FIL-000003",
+      "source_input_record_id": "INP-000005",
+      "request_input_record_id": "INP-000006",
+      "output_record_id": "OUT-000003",
+      "created_at": "2026-03-25T19:14:46Z"
+    }
+  ]
+}

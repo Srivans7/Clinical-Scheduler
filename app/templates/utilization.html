@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinical Trial Scheduler - Bed Utilization</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span class="nav-title">TrialScheduler</span>
+      <span class="nav-version">v1.0</span>
+    </div>
+    <div class="nav-meta">
+      <a href="{{ url_for('index') }}" class="nav-link">Planner</a>
+      <a href="{{ url_for('history_page') }}" class="nav-link">History</a>
+      <a href="{{ url_for('utilization_page') }}" class="nav-link active">Utilization</a>
+      <span class="nav-tag">Clinical Operations</span>
+    </div>
+  </div>
+</nav>
+
+<div class="hero-bar">
+  <div class="hero-inner">
+    <h1 class="hero-title">Bed Utilization</h1>
+    <p class="hero-sub">Select a transaction to view a date-by-clinic occupancy matrix for the existing schedule and proposed allocation.</p>
+  </div>
+</div>
+
+<main class="page-shell">
+
+  <!-- Transaction selector -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Select Scheduling Transaction</h2>
+        <p class="panel-sub">Loads the most recent 20 transactions from audit history</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:4px 0 8px;">
+      <select id="txn-select" class="toolbar-select" style="min-width:340px;max-width:100%;">
+        <option value="">— loading transactions… —</option>
+      </select>
+      <button id="load-btn" class="btn btn-primary" disabled>Load Utilization</button>
+    </div>
+    <p id="txn-error" class="form-error" style="display:none;"></p>
+  </section>
+
+  <!-- Utilization table section -->
+  <section class="panel" id="util-panel" style="display:none;">
+    <div class="panel-header between">
+      <div>
+        <h2 class="panel-title" id="util-title">Bed Utilization</h2>
+        <p class="panel-sub" id="util-sub"></p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="util-legend util-legend--low">Low (&lt;50 %)</span>
+        <span class="util-legend util-legend--mid">Mid (50-79 %)</span>
+        <span class="util-legend util-legend--high">High (≥80 %)</span>
+      </div>
+    </div>
+    <div id="util-loading" style="padding:24px 0;text-align:center;color:var(--text-secondary);display:none;">
+      Loading utilization data…
+    </div>
+    <div class="table-wrap" id="util-table-wrap" style="display:none;">
+      <table class="data-table util-table" id="util-table">
+        <thead id="util-thead"></thead>
+        <tbody id="util-tbody"></tbody>
+        <tfoot id="util-tfoot"></tfoot>
+      </table>
+    </div>
+    <p id="util-empty" style="padding:24px 0;text-align:center;color:var(--text-secondary);display:none;">
+      No occupancy data found for this transaction.
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span>Clinical Trial Scheduler &nbsp;·&nbsp; Bed Utilization View</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  const txnSelect = document.getElementById("txn-select");
+  const loadBtn   = document.getElementById("load-btn");
+  const txnError  = document.getElementById("txn-error");
+  const utilPanel = document.getElementById("util-panel");
+  const utilTitle = document.getElementById("util-title");
+  const utilSub   = document.getElementById("util-sub");
+  const utilLoading      = document.getElementById("util-loading");
+  const utilTableWrap    = document.getElementById("util-table-wrap");
+  const utilEmpty        = document.getElementById("util-empty");
+  const utilThead        = document.getElementById("util-thead");
+  const utilTbody        = document.getElementById("util-tbody");
+  const utilTfoot        = document.getElementById("util-tfoot");
+
+  // ── load recent transactions into the dropdown ──────────────────────────
+  async function loadTransactions() {
+    try {
+      const res  = await fetch("/api/audit-log?limit=20");
+      const data = await res.json();
+      const items = data.items || [];
+
+      txnSelect.innerHTML = "";
+      if (items.length === 0) {
+        txnSelect.innerHTML = '<option value="">— no transactions found —</option>';
+        return;
+      }
+
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "— select a transaction —";
+      txnSelect.appendChild(placeholder);
+
+      items.forEach(function (item) {
+        const opt = document.createElement("option");
+        opt.value = item.transaction_id;
+        const status = item.status === "scheduled"
+          ? "[scheduled] "
+          : "[uploaded]  ";
+        const date = (item.updated_at || "").slice(0, 10);
+        opt.textContent = status + item.filename + " · " + item.transaction_id + " · " + date;
+        txnSelect.appendChild(opt);
+      });
+
+      txnSelect.disabled = false;
+    } catch (err) {
+      txnSelect.innerHTML = '<option value="">— failed to load —</option>';
+    }
+  }
+
+  txnSelect.addEventListener("change", function () {
+    loadBtn.disabled = !txnSelect.value;
+    txnError.style.display = "none";
+  });
+
+  // ── compute occupancy % for a cell ──────────────────────────────────────
+  function pct(occupied, capacity) {
+    if (!capacity) return 0;
+    return Math.round((occupied / capacity) * 100);
+  }
+
+  function cellClass(p) {
+    if (p >= 80) return "occ-high";
+    if (p >= 50) return "occ-mid";
+    if (p >  0)  return "occ-low";
+    return "occ-zero";
+  }
+
+  // ── render the utilization grid ─────────────────────────────────────────
+  function renderGrid(data) {
+    const { dates, clinics, grid, totals, clinic_totals } = data;
+
+    // Build capacity lookup
+    const capMap = {};
+    clinics.forEach(function (c) { capMap[c.id] = c.capacity; });
+
+    // ── thead ──
+    const headRow = document.createElement("tr");
+    let th = document.createElement("th");
+    th.textContent = "Date";
+    headRow.appendChild(th);
+    clinics.forEach(function (c) {
+      th = document.createElement("th");
+      th.textContent = "Clinic " + c.id + " (cap " + c.capacity + ")";
+      headRow.appendChild(th);
+    });
+    th = document.createElement("th");
+    th.textContent = "Total";
+    headRow.appendChild(th);
+    utilThead.innerHTML = "";
+    utilThead.appendChild(headRow);
+
+    // ── tbody ──
+    utilTbody.innerHTML = "";
+    dates.forEach(function (date) {
+      const row     = document.createElement("tr");
+      const dayData = grid[date] || {};
+
+      const dateCell = document.createElement("td");
+      dateCell.textContent = date;
+      dateCell.style.fontVariantNumeric = "tabular-nums";
+      row.appendChild(dateCell);
+
+      clinics.forEach(function (c) {
+        const occupied  = dayData[c.id] || 0;
+        const capacity  = capMap[c.id]  || 0;
+        const p         = pct(occupied, capacity);
+        const td        = document.createElement("td");
+        td.className    = "occ-cell " + cellClass(p);
+        td.textContent  = occupied > 0 ? occupied + " / " + capacity : "—";
+        td.title        = occupied + " of " + capacity + " beds (" + p + "%)";
+        row.appendChild(td);
+      });
+
+      const totalCell      = document.createElement("td");
+      totalCell.className  = "occ-total";
+      totalCell.textContent = totals[date] || 0;
+      row.appendChild(totalCell);
+
+      utilTbody.appendChild(row);
+    });
+
+    // ── tfoot (column totals) ──
+    const footRow = document.createElement("tr");
+    const footLabel = document.createElement("td");
+    footLabel.textContent = "Sum";
+    footLabel.style.fontWeight = "600";
+    footRow.appendChild(footLabel);
+    clinics.forEach(function (c) {
+      const td = document.createElement("td");
+      td.textContent = clinic_totals[c.id] || 0;
+      td.style.fontWeight = "600";
+      footRow.appendChild(td);
+    });
+    const footTotal = document.createElement("td");
+    const grandTotal = Object.values(clinic_totals).reduce(function (a, b) { return a + b; }, 0);
+    footTotal.textContent = grandTotal;
+    footTotal.style.fontWeight = "700";
+    footRow.appendChild(footTotal);
+    utilTfoot.innerHTML = "";
+    utilTfoot.appendChild(footRow);
+  }
+
+  // ── load utilization data ────────────────────────────────────────────────
+  loadBtn.addEventListener("click", async function () {
+    const txnId = txnSelect.value;
+    if (!txnId) return;
+
+    utilPanel.style.display    = "";
+    utilLoading.style.display  = "";
+    utilTableWrap.style.display = "none";
+    utilEmpty.style.display    = "none";
+    txnError.style.display     = "none";
+    loadBtn.disabled           = true;
+
+    try {
+      const res  = await fetch("/api/utilization?transaction_id=" + encodeURIComponent(txnId));
+      const data = await res.json();
+
+      if (!res.ok) {
+        txnError.textContent   = data.error || "Failed to load utilization.";
+        txnError.style.display = "";
+        utilLoading.style.display = "none";
+        return;
+      }
+
+      utilTitle.textContent = "Bed Utilization — " + (data.filename || txnId);
+      utilSub.textContent   = data.dates.length + " day(s) with occupancy · "
+                             + data.clinics.length + " clinic(s)";
+
+      utilLoading.style.display = "none";
+
+      if (!data.dates || data.dates.length === 0) {
+        utilEmpty.style.display = "";
+        return;
+      }
+
+      renderGrid(data);
+      utilTableWrap.style.display = "";
+    } catch (err) {
+      txnError.textContent   = "Unexpected error: " + err.message;
+      txnError.style.display = "";
+      utilLoading.style.display = "none";
+    } finally {
+      loadBtn.disabled = false;
+    }
+  });
+
+  // ── init ─────────────────────────────────────────────────────────────────
+  loadTransactions();
+}());
+</script>
+</body>
+</html>
