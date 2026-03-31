@@ -85,8 +85,12 @@
     bindDropzone();
     bindForm();
     bindActions();
-    clearPersistedState();
-    resetPreviewState();
+    if (isReloadNavigation()) {
+      clearPersistedState();
+      resetPreviewState();
+    } else if (!restorePersistedState()) {
+      resetPreviewState();
+    }
     restorePlannerFromState();
     renderValidation([], [], true);
     renderReviewMeta();
@@ -212,6 +216,7 @@
       state.existingSchedule = response.existing_schedule || [];
       resetPreviewState();
       persistState();
+      btnResetUpload.disabled = false;
 
       fillStudyForm(response.new_study || {});
       renderSummaryStrip(response);
@@ -458,7 +463,7 @@
       state.confirmedAudit = null;
       state.confirmedSummary = null;
       persistState();
-      btnResetUpload.classList.remove("hidden");
+      btnResetUpload.disabled = false;
 
       renderResults(state.previewResults);
       renderFinalSummary();
@@ -941,7 +946,7 @@
     existingTbody.innerHTML = "";
     existingCount.textContent = "";
     btnUpload.disabled = true;
-    btnResetUpload.classList.add("hidden");
+    btnResetUpload.disabled = true;
     setStatus(uploadStatus, "", "");
     renderValidation([], [], true);
     renderReviewMeta();
@@ -957,6 +962,7 @@
     setStepProgressFromState();
 
     if (!state.uploadedFilename) {
+      btnResetUpload.disabled = true;
       sectionData.classList.add("hidden");
       sectionResults.classList.add("hidden");
       return;
@@ -981,6 +987,7 @@
     dropZone.querySelector(".dropzone-hint").textContent = "Previously uploaded file loaded. Upload a new file to replace it.";
     state.pendingFile = null;
     btnUpload.disabled = true;
+    btnResetUpload.disabled = false;
 
     if (state.previewResults && state.previewResults.length) {
       sectionResults.classList.remove("hidden");
@@ -1051,6 +1058,23 @@
     } catch (_err) {
       // Ignore storage errors.
     }
+  }
+
+  function isReloadNavigation() {
+    try {
+      var entries = window.performance && window.performance.getEntriesByType
+        ? window.performance.getEntriesByType("navigation")
+        : [];
+      if (entries && entries.length > 0) {
+        return entries[0].type === "reload";
+      }
+      if (window.performance && window.performance.navigation) {
+        return window.performance.navigation.type === 1;
+      }
+    } catch (_err) {
+      // Ignore performance API issues.
+    }
+    return false;
   }
 
   function restorePersistedState() {
