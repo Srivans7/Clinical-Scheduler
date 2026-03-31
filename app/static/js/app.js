@@ -277,6 +277,12 @@
     renderPreviewState();
     btnPreview.disabled = !state.uploadedFilename || validation.errors.length > 0;
     btnConfirm.disabled = !state.previewResults || state.previewDirty || validation.errors.length > 0;
+    syncActionVisibility();
+  }
+
+  function syncActionVisibility() {
+    btnResetUpload.classList.toggle("hidden", btnResetUpload.disabled);
+    btnConfirm.classList.toggle("hidden", btnConfirm.disabled);
   }
 
   function updateSummaryStripFromForm() {
@@ -955,6 +961,7 @@
     existingCount.textContent = "";
     btnUpload.disabled = true;
     btnResetUpload.disabled = true;
+    syncActionVisibility();
     setStatus(uploadStatus, "", "");
     renderValidation([], [], true);
     renderReviewMeta();
@@ -971,6 +978,7 @@
 
     if (!state.uploadedFilename) {
       btnResetUpload.disabled = true;
+      syncActionVisibility();
       sectionData.classList.add("hidden");
       sectionResults.classList.add("hidden");
       return;
@@ -996,6 +1004,7 @@
     state.pendingFile = null;
     btnUpload.disabled = true;
     btnResetUpload.disabled = false;
+    syncActionVisibility();
 
     if (state.previewResults && state.previewResults.length) {
       sectionResults.classList.remove("hidden");
@@ -1003,6 +1012,7 @@
     } else {
       sectionResults.classList.add("hidden");
     }
+    syncActionVisibility();
   }
 
   function resetStepStates() {
